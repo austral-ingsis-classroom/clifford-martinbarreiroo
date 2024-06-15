@@ -28,7 +28,7 @@ public class LsCommand implements Command {
       if (order.equals("desc")) {
         comparator = comparator.reversed();
       }
-      elements = elements.stream().sorted(comparator).toList();
+      elements = elements.stream().sorted(comparator).collect(Collectors.toList());
     }
     if (elements.isEmpty()) {
       return "";
