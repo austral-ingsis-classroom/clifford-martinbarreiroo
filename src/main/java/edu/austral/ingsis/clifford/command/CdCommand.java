@@ -4,31 +4,33 @@ import edu.austral.ingsis.clifford.filesystem.Directory;
 import edu.austral.ingsis.clifford.filesystem.FileSystem;
 
 public class CdCommand implements Command {
-    private Directory currentDirectory;
-    private final String directoryName;
+  private Directory currentDirectory;
+  private final String directoryName;
 
-    public CdCommand(Directory currentDirectory, String directoryName) {
-        this.currentDirectory = currentDirectory;
-        this.directoryName = directoryName;
-    }
+  public CdCommand(Directory currentDirectory, String directoryName) {
+    this.currentDirectory = currentDirectory;
+    this.directoryName = directoryName;
+  }
 
-    @Override
-    public String execute() {
-        for (FileSystem fileSystem : currentDirectory.getElements()) {
-            if (fileSystem instanceof Directory && fileSystem.getName().equals(directoryName)) {
-                currentDirectory = (Directory) fileSystem;
-                break;
-            }
-        }
-        if (currentDirectory.getName().equals(directoryName)) {
-            return "moved to directory" + " " + "'" + currentDirectory.getName() + "'";
+  @Override
+  public String execute() {
+    String[] directories = directoryName.split("/");
+    for (String dir : directories) {
+      if ("..".equals(dir)) {
+        currentDirectory = currentDirectory.getParent();
+      } else {
+        FileSystem fileSystem = currentDirectory.find(dir);
+        if (fileSystem instanceof Directory) {
+          currentDirectory = (Directory) fileSystem;
         } else {
-            return "directory" + " " + "'" + directoryName + "'" + " " + "not found";
+          return "'" + dir + "'" + " " + "directory does not exist";
         }
+      }
     }
+    return "moved to directory" + " " + "'" + currentDirectory.getName() + "'";
+  }
 
-    public Directory getResult() {
-        return currentDirectory;
-    }
-
+  public Directory getResult() {
+    return currentDirectory;
+  }
 }
