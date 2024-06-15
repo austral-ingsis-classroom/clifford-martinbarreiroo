@@ -1,5 +1,7 @@
 package edu.austral.ingsis;
 
+import edu.austral.ingsis.clifford.command.*;
+import edu.austral.ingsis.clifford.filesystem.Directory;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -23,48 +25,144 @@ public class FileSystemTests {
 
   @Test
   public void test1() {
-    executeTest(List.of(
-            entry("ls", ""),
-            entry("mkdir horace", "'horace' directory created"),
-            entry("ls", "horace"),
-            entry("mkdir emily", "'emily' directory created"),
-            entry("ls", "horace emily"),
-            entry("ls --ord=asc", "emily horace")
-    ));
+    // Create a FileSystem instance
+    Directory root = new Directory("/");
+
+    // Execute the 'ls' command
+    LsCommand lsCommand = new LsCommand(root);
+    assertEquals("", lsCommand.execute());
+
+    // Execute the 'mkdir horace' command
+    MkDirCommand mkdirHoraceCommand = new MkDirCommand(root, "horace");
+    assertEquals("'horace' directory created", mkdirHoraceCommand.execute());
+
+    // Execute the 'ls' command
+
+    assertEquals("horace", lsCommand.execute());
+
+    // Execute the 'mkdir emily' command
+    MkDirCommand mkdirEmilyCommand = new MkDirCommand(root, "emily");
+    assertEquals("'emily' directory created", mkdirEmilyCommand.execute());
+
+    // Execute the 'ls' command
+    assertEquals("horace emily", lsCommand.execute());
+
+    // Execute the 'ls --ord=asc' command
+    LsCommand lsOrdAscCommand = new LsCommand(root, "asc");
+    assertEquals("emily horace", lsOrdAscCommand.execute());
   }
 
   @Test
-  void test2() {
-    executeTest(List.of(
-            entry("mkdir horace", "'horace' directory created"),
-            entry("mkdir emily", "'emily' directory created"),
-            entry("mkdir jetta", "'jetta' directory created"),
-            entry("ls", "horace emily jetta"),
-            entry("cd emily", "moved to directory 'emily'"),
-            entry("pwd", "/emily"),
-            entry("touch elizabeth.txt", "'elizabeth.txt' file created"),
-            entry("mkdir t-bone", "'t-bone' directory created"),
-            entry("ls", "elizabeth t-bone")
-    ));
+  public void test2() {
+    // Create a FileSystem instance
+    Directory root = new Directory("/");
+
+    // Execute the 'mkdir horace' command
+    MkDirCommand mkdirHoraceCommand = new MkDirCommand(root, "horace");
+
+    assertEquals("'horace' directory created", mkdirHoraceCommand.execute());
+
+    // Execute the 'mkdir emily' command
+    MkDirCommand mkdirEmilyCommand = new MkDirCommand(root, "emily");
+
+    assertEquals("'emily' directory created", mkdirEmilyCommand.execute());
+
+    // Execute the 'mkdir jetta' command
+    MkDirCommand mkdirJettaCommand = new MkDirCommand(root, "jetta");
+
+    assertEquals("'jetta' directory created", mkdirJettaCommand.execute());
+
+    // Execute the 'ls' command
+    LsCommand lsCommand = new LsCommand(root);
+    assertEquals("horace emily jetta", lsCommand.execute());
+
+    // Execute the 'cd emily' command
+    CdCommand cdEmilyCommand = new CdCommand(root, "emily");
+
+    assertEquals("moved to directory 'emily'", cdEmilyCommand.execute());
+
+    // Execute the 'pwd' command
+    PwdCommand pwdCommand = new PwdCommand(cdEmilyCommand.getResult());
+
+    assertEquals("/emily", pwdCommand.execute());
+
+    // Execute the 'touch elizabeth.txt' command
+    TouchCommand touchElizabethCommand = new TouchCommand(cdEmilyCommand.getResult(), "elizabeth.txt");
+
+    assertEquals("'elizabeth.txt' file created", touchElizabethCommand.execute());
+
+    // Execute the 'mkdir t-bone' command
+    MkDirCommand mkdirTBoneCommand = new MkDirCommand(cdEmilyCommand.getResult(), "t-bone");
+
+    assertEquals("'t-bone' directory created", mkdirTBoneCommand.execute());
+
+    // Execute the 'ls' command
+    lsCommand = new LsCommand(cdEmilyCommand.getResult());
+    assertEquals("elizabeth.txt t-bone", lsCommand.execute());
   }
 
   @Test
-  void test3() {
-    executeTest(List.of(
-            entry("mkdir horace", "'horace' directory created"),
-            entry("mkdir emily", "'emily' directory created"),
-            entry("mkdir jetta", "'jetta' directory created"),
-            entry("cd emily", "moved to directory 'emily'"),
-            entry("touch elizabeth.txt", "'elizabeth.txt' file created"),
-            entry("mkdir t-bone", "'t-bone' directory created"),
-            entry("touch elizabeth.txt", "'elizabeth.txt' file created"),
-            entry("ls", "t-bone elizabeth.txt"),
-            entry("rm", "cannot remove 't-bone', is a directory"),
-            entry("rm --recursive t-bone", "'t-bone' removed"),
-            entry("ls", "elizabeth.txt"),
-            entry("rm elizabeth.txt", "'elizabeth.txt' removed"),
-            entry("ls", "")
-    ));
+  public void test3() {
+    // Create a FileSystem instance
+    Directory root = new Directory("/");
+
+    // Execute the 'mkdir horace' command
+    MkDirCommand mkdirHoraceCommand = new MkDirCommand(root, "horace");
+
+    assertEquals("'horace' directory created", mkdirHoraceCommand.execute());
+
+    // Execute the 'mkdir emily' command
+    MkDirCommand mkdirEmilyCommand = new MkDirCommand(root, "emily");
+
+    assertEquals("'emily' directory created", mkdirEmilyCommand.execute());
+
+    // Execute the 'mkdir jetta' command
+    MkDirCommand mkdirJettaCommand = new MkDirCommand(root, "jetta");
+
+    assertEquals("'jetta' directory created", mkdirJettaCommand.execute());
+
+    // Execute the 'cd emily' command
+    CdCommand cdEmilyCommand = new CdCommand(root, "emily");
+    assertEquals("moved to directory 'emily'", cdEmilyCommand.execute());
+
+    // Execute the 'touch elizabeth.txt' command
+    TouchCommand touchElizabethCommand = new TouchCommand(cdEmilyCommand.getResult(), "elizabeth.txt");
+
+    assertEquals("'elizabeth.txt' file created", touchElizabethCommand.execute());
+
+    // Execute the 'mkdir t-bone' command
+    MkDirCommand mkdirTBoneCommand = new MkDirCommand(cdEmilyCommand.getResult(), "t-bone");
+
+    assertEquals("'t-bone' directory created", mkdirTBoneCommand.execute());
+
+    // Execute the 'touch elizabeth.txt' command
+
+    assertEquals("'elizabeth.txt' file already exists", touchElizabethCommand.execute());
+
+    // Execute the 'ls' command
+    LsCommand lsCommand = new LsCommand(cdEmilyCommand.getResult());
+    assertEquals("elizabeth.txt t-bone", lsCommand.execute());
+
+    // Execute the 'rm' command
+    RmCommand rmCommand = new RmCommand(cdEmilyCommand.getResult(), "t-bone", false);
+
+    assertEquals("cannot remove 't-bone', is a directory", rmCommand.execute());
+
+    // Execute the 'rm --recursive t-bone' command
+    RmCommand rmRecursiveCommand = new RmCommand(cdEmilyCommand.getResult(), "t-bone", true);
+
+    assertEquals("'t-bone' removed", rmRecursiveCommand.execute());
+
+    // Execute the 'ls' command
+    assertEquals("elizabeth.txt", lsCommand.execute());
+
+    // Execute the 'rm elizabeth.txt' command
+    rmCommand = new RmCommand(cdEmilyCommand.getResult(), "elizabeth.txt", false);
+
+    assertEquals("'elizabeth.txt' removed", rmCommand.execute());
+
+    // Execute the 'ls' command
+    assertEquals("", lsCommand.execute());
   }
 
   @Test

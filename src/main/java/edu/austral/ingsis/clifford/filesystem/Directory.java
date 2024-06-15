@@ -20,10 +20,40 @@ public class Directory implements FileSystem {
         elements.add(fileSystem);
     }
 
+    public List<FileSystem> getElements() {
+        return elements;
+    }
+
     public void print() {
         System.out.println("Directory: " + name);
         for (FileSystem fileSystem : elements) {
             fileSystem.print();
         }
+    }
+
+    public Boolean contains(String name) {
+        for (FileSystem fileSystem : elements) {
+            if (fileSystem.getName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public FileSystem find (String name) {
+        for (FileSystem fileSystem : elements) {
+            if (fileSystem.getName().equals(name)) {
+                return fileSystem;
+            }
+        }
+        return null;
+    }
+
+    public void remove(FileSystem fileSystem) {
+        elements.remove(fileSystem);
+    }
+
+    public String getPath() {
+        return name;
     }
 }
