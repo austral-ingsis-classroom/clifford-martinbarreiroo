@@ -14,16 +14,24 @@ public class CdCommand implements Command {
 
   @Override
   public String execute() {
-    String[] directories = directoryName.split("/");
-    for (String dir : directories) {
-      if ("..".equals(dir)) {
+    if ("/".equals(directoryName)) {
+      while (currentDirectory.getParent() != null) {
         currentDirectory = currentDirectory.getParent();
-      } else {
-        FileSystem fileSystem = currentDirectory.find(dir);
-        if (fileSystem instanceof Directory) {
-          currentDirectory = (Directory) fileSystem;
+      }
+    } else {
+      String[] directories = directoryName.split("/");
+      for (String dir : directories) {
+        if ("..".equals(dir)) {
+          if (currentDirectory.getParent() != null) {
+            currentDirectory = currentDirectory.getParent();
+          }
         } else {
-          return "'" + dir + "'" + " " + "directory does not exist";
+          FileSystem fileSystem = currentDirectory.find(dir);
+          if (fileSystem instanceof Directory) {
+            currentDirectory = (Directory) fileSystem;
+          } else {
+            return "'" + dir + "'" + " " + "directory does not exist";
+          }
         }
       }
     }
